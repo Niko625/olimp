@@ -127,33 +127,31 @@ async function loginUser(login, password) {
   const hasLocalLogin = users.some(u => u.email === login || u.phone === login);
   if (hasLocalLogin) throw new Error('Неверные данные');
 
-  // 3. В Supabase нет Password Auth в текущей схеме — только JWT-пользователи через RLS.
-  //    Если пользователь добавлен через миграцию, нужно синхронизировать его в localStorage.
+  // 3. Пробуем найти пользователя в Supabase
   if (window.supabaseClient) {
-    console.log('[Login] Пользователь не найден в localStorage, пробуем Supabase...');
+    console.log('[Login] Пользователь не найден в localStorage, проверяю Supabase...');
     try {
-      const { data } = await window.supabaseClient
+      const { data, error } = await window.supabaseClient
         .from('users').select('*').eq('email', login).single();
-      if (data && !data.password) {
-        // В Supabase нет пароля — пользователь зарегистрирован не через сайт
-        throw new Error('Этот аккаунт зарегистрирован через Supabase Auth. Используйте кнопку входа через Google/Телефон.');
-      }
+      if (error) throw new Error('Пользователь не найден');
       if (data) {
-        // Синхронизируем в localStorage и возвращаем
+        // Пользователь есть в Supabase — синхронизируем в localStorage и возвращаем
         const allUsers = getUsers();
-        const found = { ...data, password: password }; // сохраняем введённый пароль
+        const found = { ...data, password: password };
         allUsers.push(found);
         saveUsers(allUsers);
         setCurrentUser(found);
         console.log('[Login] ✅ Загружен из Supabase:', data.email);
         return found;
       }
+      throw new Error('Пользователь не найден');
     } catch(e) {
       console.warn('[Login] Supabase check failed:', e.message);
+      throw new Error('Пользователь не найден');
     }
   }
 
-  throw new Error('Неверные данные');
+  throw new Error('Пользователь не найден');
 }
 
 function updateCurrentUser(patch) {
