@@ -1,0 +1,12 @@
+{
+  "name": "olimp-fit",
+  "version": "1.0.0",
+  "description": "Спорткомплекс ОЛИМП — сайт с админ-панелью",
+  "scripts": {
+    "start": "npx serve . -l 5500",
+    "dev": "npx serve . -l 5500"
+  },
+  "devDependencies": {
+    "serve": "^14.0.0"
+  }
+}

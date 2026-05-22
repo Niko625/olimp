@@ -721,7 +721,7 @@ function renderAdmin() {
     switch (adminTab) {
       case 'stats':    panel.appendChild(renderAdminStats());    break;
       case 'classes':  panel.appendChild(renderAdminClasses());  break;
-      case 'bookings': panel.appendChild(renderAdminBookings()); break;
+      case 'bookings': renderAdminBookings().then(content => panel.appendChild(content)); break;
     }
   }
   return el;
@@ -729,18 +729,19 @@ function renderAdmin() {
 
 /* ---- Вкладка "Сводка" ---- */
 function renderAdminStats() {
-  const classes = getClasses();
-  const allBookings = getBookings();
-  const allPayments = getPayments();
-  const today = new Date().toLocaleDateString('ru-RU', { weekday: 'short', day: '2-digit', month: '2-digit' });
-  const todayBk = allBookings.filter(b => b.date && b.date.includes(today) || b.day === 'Пн'); // простая проверка по дню
-  const currMonth = new Date().toLocaleDateString('ru-RU', { month: 'long' });
-  const monthPay = allPayments.reduce((s, p) => s + (p.price || p.total || 0), 0);
+  const classes      = getClasses();
+  const allBookings  = getBookings();
+  const allPayments  = getPayments();
+  const userCount    = getUsers().length;
+  const today        = new Date().toLocaleDateString('ru-RU', { weekday: 'short', day: '2-digit', month: '2-digit' });
+  const todayBk      = allBookings.filter(b => b.date && b.date.includes(today) || b.day === 'Пн');
+  const currMonth    = new Date().toLocaleDateString('ru-RU', { month: 'long' });
+  const monthPay     = allPayments.reduce((s, p) => s + (p.price || p.total || 0), 0);
   const grid = $(`
     <div class="admin-stats-grid">
       <div class="admin-stat-card" data-aos="zoom-in">
         <div class="admin-stat-card__icon"><i class="fas fa-users"></i></div>
-        <div class="admin-stat-card__value">${getUsers().length}</div>
+        <div class="admin-stat-card__value">${userCount}</div>
         <div class="admin-stat-card__label">Клиентов</div>
       </div>
       <div class="admin-stat-card" data-aos="zoom-in" data-aos-delay="100">
@@ -767,16 +768,17 @@ function renderAdminStats() {
 /* ---- Вкладка "Пользователи" ---- */
 async function renderAdminUsers() {
   let users = getUsers();
+  const t = document.createElement('template');
 
-  // Пробуем подгрузить пользователей из Supabase, если клиент подключен
+  // Подгружаем из Supabase
   if (window.supabaseClient) {
     try {
-      const { data, error } = await window.supabaseClient.from('users').select('*').order('created_at', { ascending: false });
+      const { data, error } = await window.supabaseClient
+        .from('users').select('*').order('created_at', { ascending: false });
       if (!error && data && data.length > 0) {
-        // Мержим Supabase + localStorage, убирая дубли по email
-        const localEmails = new Set(users.map(u => u.email));
-        const merged = [...data, ...users.filter(u => !localEmails.has(u.email))];
-        // Приводим структуру Supabase-записей к формату приложения
+        const localEmails = new Set(users.map(u => u.email).filter(Boolean));
+        const extraFromLocal = users.filter(u => u.email && !localEmails.has(u.email));
+        const merged = [...data, ...extraFromLocal];
         users = merged.map(u => ({
           id: u.id,
           name: u.name || '',
@@ -784,21 +786,25 @@ async function renderAdminUsers() {
           phone: u.phone || '',
           subscription: u.subscription || null,
           createdAt: u.created_at || u.createdAt || '',
-          isAdmin: u.isAdmin || u.role === 'admin' || false
+          isAdmin: !!u.isAdmin || u.role === 'admin' || false
         }));
       }
     } catch (e) {
-      console.warn('Не удалось загрузить пользователей из Supabase:', e.message);
+      console.warn('[Admin Users] Supabase:', e.message);
     }
   }
 
-  // Сортируем по дате регистрации (новые сверху)
   users.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 
-  const t = document.createElement('template');
   t.innerHTML = `
     <div class="admin-users-section">
-      <div class="admin-users-count"><i class="fas fa-users"></i> Всего пользователей: <strong>${users.length}</strong></div>
+      <div class="admin-users-count">
+        <i class="fas fa-users"></i> Всего пользователей: <strong>${users.length}</strong>
+        <span style="color:var(--text-secondary);font-size:0.85rem;margin-left:12px">
+          (localStorage: ${getUsers().length} + Supabase: ${Math.max(0, users.length - getUsers().length)})
+        </span>
+      </div>
+      ${!users.length ? '<p class="empty-state">Пользователей пока нет</p>' : `
       <div class="admin-table-wrap">
         <table class="admin-table">
           <thead><tr>
@@ -806,7 +812,7 @@ async function renderAdminUsers() {
             <th>Абонемент</th><th>Роль</th><th>Дата регистрации</th>
           </tr></thead>
           <tbody>
-            ${users.length ? users.map(u => `
+            ${users.map(u => `
               <tr>
                 <td>${u.id}</td>
                 <td>${u.name}</td>
@@ -816,10 +822,10 @@ async function renderAdminUsers() {
                 <td>${u.isAdmin ? '<span style="color:var(--accent-purple)"><i class="fas fa-shield-alt"></i> Админ</span>' : 'Пользователь'}</td>
                 <td>${u.createdAt ? new Date(u.createdAt).toLocaleDateString('ru-RU') : '—'}</td>
               </tr>
-            `).join('') : '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-secondary)">Пользователей пока нет</td></tr>'}
+            `).join('')}
           </tbody>
         </table>
-      </div>
+      </div>`}
     </div>`;
 
   if (typeof AOS !== 'undefined') AOS.refreshHard();
@@ -933,7 +939,7 @@ function openClassAddModal() {
       time: f.time.value,
       room: f.room.value.trim(),
       trainer: f.trainer.value.trim(),
-      limit: +f.limit.value || 0
+      max_seats: +f.max_seats.value || 0
     });
     node.remove();
     showToast('Занятие добавлено');
@@ -967,7 +973,7 @@ function openClassEditModal(clsId) {
           <div class="form-group"><label>Время</label><input name="time" type="time" value="${cls.time}" required></div>
           <div class="form-group"><label>Зал</label><input name="room" value="${cls.room||''}" placeholder="Основной зал"></div>
           <div class="form-group"><label>Тренер</label><input name="trainer" value="${cls.trainer||''}" placeholder="Имя тренера"></div>
-          <div class="form-group"><label>Лимит мест</label><input name="limit" type="number" min="0" value="${cls.limit||0}"></div>
+          <div class="form-group"><label>Лимит мест</label><input name="max_seats" type="number" min="0" value="${cls.max_seats||0}"></div>
           <div style="display:flex;gap:10px;margin-top:16px">
             <button type="submit" class="btn btn-primary btn-block">Сохранить</button>
             <button type="button" class="btn btn-outline btn-block" id="close-class-form">Отмена</button>
@@ -990,7 +996,7 @@ function openClassEditModal(clsId) {
       time: f.time.value,
       room: f.room.value.trim(),
       trainer: f.trainer.value.trim(),
-      limit: +f.limit.value || 0
+      max_seats: +f.max_seats.value || 0
     });
     node.remove();
     showToast('Занятие обновлено');
@@ -999,8 +1005,34 @@ function openClassEditModal(clsId) {
 }
 
 /* ---- Вкладка "Записи" ---- */
-function renderAdminBookings() {
-  const all = getBookings();
+async function renderAdminBookings() {
+  let all = getBookings();
+
+  // Подгружаем записи из Supabase
+  if (window.supabaseClient) {
+    try {
+      const { data, error } = await window.supabaseClient
+        .from('bookings').select('*').order('created_at', { ascending: false });
+      if (!error && data && data.length > 0) {
+        const localIds = new Set(all.map(b => b.id).filter(Boolean));
+        const extraFromSB = data.filter(b => b.id && !localIds.has(String(b.id)));
+        all = [...all, ...extraFromSB.map(b => ({
+          id: b.id,
+          userId: b.user_id,
+          userEmail: '',
+          className: b.class_name,
+          day: b.day,
+          time: b.time,
+          name: b.name || '',
+          phone: b.phone || '',
+          date: ''
+        }))];
+      }
+    } catch (e) {
+      console.warn('[Admin Bookings] Supabase:', e.message);
+    }
+  }
+
   // Группировка по классу
   const groups = {};
   all.forEach(b => {
