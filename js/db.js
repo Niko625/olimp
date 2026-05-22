@@ -132,7 +132,7 @@ async function loginUser(login, password) {
     console.log('[Login] Пользователь не найден в localStorage, проверяю Supabase...');
     try {
       const { data, error } = await window.supabaseClient
-        .from('users').select('*').eq('email', login).single();
+        .from('users').select('*').eq('email', login.toLowerCase()).single();
       if (error) throw new Error('Пользователь не найден');
       if (data) {
         // Пользователь есть в Supabase — синхронизируем в localStorage и возвращаем
