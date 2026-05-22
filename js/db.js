@@ -113,9 +113,9 @@ async function registerUser({ name, email, phone, password }) {
   return user;
 }
 
-/** Авторизация: проверяет localStorage (Supabase Auth отдельно, если нужен) */
-function loginUser(login, password) {
-  // Сначала проверяем localStorage
+/** Авторизация: проверяет localStorage, потом — Supabase */
+async function loginUser(login, password) {
+  // 1. Сначала пробуем локально (быстро, без запросов к БД)
   const users = getUsers();
   const localUser = users.find(u => (u.email === login || u.phone === login) && u.password === password);
   if (localUser) {
@@ -123,10 +123,34 @@ function loginUser(login, password) {
     return localUser;
   }
 
-  // Если не найден локально — проверяем Supabase Password Auth
+  // 2. Если есть запись в localStorage (но с неправильным паролем) — не ходим в Supabase
+  const hasLocalLogin = users.some(u => u.email === login || u.phone === login);
+  if (hasLocalLogin) throw new Error('Неверные данные');
+
+  // 3. В Supabase нет Password Auth в текущей схеме — только JWT-пользователи через RLS.
+  //    Если пользователь добавлен через миграцию, нужно синхронизировать его в localStorage.
   if (window.supabaseClient) {
-    console.log('[Login] Пользователь не найден в localStorage, проверяем Supabase...');
-    throw new Error('Пользователь не найден в локальной базе. Используйте Supabase Auth для входа.');
+    console.log('[Login] Пользователь не найден в localStorage, пробуем Supabase...');
+    try {
+      const { data } = await window.supabaseClient
+        .from('users').select('*').eq('email', login).single();
+      if (data && !data.password) {
+        // В Supabase нет пароля — пользователь зарегистрирован не через сайт
+        throw new Error('Этот аккаунт зарегистрирован через Supabase Auth. Используйте кнопку входа через Google/Телефон.');
+      }
+      if (data) {
+        // Синхронизируем в localStorage и возвращаем
+        const allUsers = getUsers();
+        const found = { ...data, password: password }; // сохраняем введённый пароль
+        allUsers.push(found);
+        saveUsers(allUsers);
+        setCurrentUser(found);
+        console.log('[Login] ✅ Загружен из Supabase:', data.email);
+        return found;
+      }
+    } catch(e) {
+      console.warn('[Login] Supabase check failed:', e.message);
+    }
   }
 
   throw new Error('Неверные данные');
