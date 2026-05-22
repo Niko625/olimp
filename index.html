@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>СПОРТКОМПЛЕКС «ОЛИМП»</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/visuals.css">
+  <link rel="stylesheet" href="css/adaptive.css">
+  <link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+  <div id="page-loader"><div class="loader-ring"></div><p class="loader-text">ОЛИМП</p></div>
+
+  <header class="header">
+    <div class="container header__inner">
+      <a href="#/home" class="logo" data-route="home">
+        <div class="logo__icon"><i class="fas fa-dumbbell"></i></div>
+        <span>ОЛИМП</span>
+      </a>
+      <nav class="nav">
+        <a href="#/home" class="nav__link" data-route="home">Главная</a>
+        <a href="#/services" class="nav__link" data-route="services">Услуги</a>
+        <a href="#/trainers" class="nav__link" data-route="trainers">Тренеры</a>
+        <a href="#/price" class="nav__link" data-route="price">Прайс</a>
+        <a href="#/schedule" class="nav__link" data-route="schedule">Расписание</a>
+        <a href="#/shop" class="nav__link" data-route="shop">Мерч</a>
+        <a href="#/about" class="nav__link" data-route="about">О нас</a>
+        <a href="#/contacts" class="nav__link" data-route="contacts">Контакты</a>
+        <a href="#/login" class="nav__link nav__auth" id="nav-login" data-route="login">Вход</a>
+        <a href="#/register" class="nav__link nav__auth" id="nav-register" data-route="register">Регистрация</a>
+      </nav>
+      <div class="header__actions">
+        <a href="#/cart" class="cart-badge btn btn-outline btn-sm" data-route="cart">
+          <i class="fas fa-shopping-cart"></i><span class="cart-badge__count">0</span>
+        </a>
+        <a href="#/profile" class="btn btn-outline btn-sm hidden" id="hdr-profile" data-route="profile">Кабинет</a>
+        <a href="#/login" class="btn btn-outline btn-sm" id="hdr-login" data-route="login">Вход</a>
+        <a href="#/register" class="btn btn-primary btn-sm" id="hdr-register" data-route="register">Регистрация</a>
+        <button class="burger" aria-label="Меню"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+  </header>
+
+  <main id="app"></main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__brand">
+          <a href="#/home" class="logo" data-route="home"><div class="logo__icon"><i class="fas fa-dumbbell"></i></div><span>ОЛИМП</span></a>
+          <p>Премиальный спортивный комплекс. Стань сильнее уже сегодня.</p>
+        </div>
+        <div><h4>Разделы</h4><ul>
+          <li><a href="#/services" data-route="services">Услуги</a></li>
+          <li><a href="#/trainers" data-route="trainers">Тренеры</a></li>
+          <li><a href="#/price" data-route="price">Прайс</a></li>
+          <li><a href="#/schedule" data-route="schedule">Расписание</a></li>
+          <li><a href="#/shop" data-route="shop">Мерч</a></li>
+          <li><a href="#/about" data-route="about">О нас</a></li>
+          <li><a href="#/contacts" data-route="contacts">Контакты</a></li>
+        </ul></div>
+        <div><h4>Аккаунт</h4><ul>
+          <li><a href="#/login" data-route="login">Вход</a></li>
+          <li><a href="#/register" data-route="register">Регистрация</a></li>
+          <li><a href="#/profile" data-route="profile">Личный кабинет</a></li>
+          <li><a href="#/cart" data-route="cart">Корзина</a></li>
+        </ul></div>
+        <div><h4>Контакты</h4><ul>
+          <li><i class="fas fa-phone"></i> +7 (495) 123-45-67</li>
+          <li><i class="fas fa-envelope"></i> info@olimp-fit.ru</li>
+          <li><i class="fas fa-map-marker-alt"></i> г. Москва, ул. Спортивная, 15</li>
+        </ul>
+        <div class="footer__social">
+          <a href="#" aria-label="VK"><i class="fab fa-vk"></i></a>
+          <a href="#" aria-label="Telegram"><i class="fab fa-telegram"></i></a>
+          <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+        </div></div>
+      </div>
+      <div class="footer__bottom"><p>&copy; 2026 СПОРТКОМПЛЕКС «ОЛИМП»</p></div>
+    </div>
+  </footer>
+
+  <!-- Модальные окна -->
+  <div id="payment-modal" class="modal-overlay">
+    <div class="modal"><button class="modal__close">&times;</button>
+      <h2 id="payment-title">Оплата</h2>
+      <form id="payment-form" class="payment-form">
+        <div class="form-group"><label>Номер карты</label><input placeholder="0000 0000 0000 0000" required></div>
+        <div class="card-row">
+          <div class="form-group"><label>Срок</label><input placeholder="MM/YY" required></div>
+          <div class="form-group"><label>CVV</label><input placeholder="***" required></div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Оплатить картой</button>
+        <div class="payment-alt" style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+          <a href="https://www.paypal.com" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="flex:1;text-align:center">PayPal</a>
+          <a href="https://stripe.com" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="flex:1;text-align:center">Stripe</a>
+        </div>
+        <p style="text-align:center;margin-top:12px;font-size:0.8rem;color:var(--text-secondary)">Демо-оплата для учебного проекта</p>
+      </form>
+    </div>
+  </div>
+
+  <div id="service-modal" class="modal-overlay">
+    <div class="modal"><button class="modal__close">&times;</button>
+      <div id="service-modal-visual" class="visual modal-visual"></div>
+      <h2 id="service-modal-title"></h2>
+      <p id="service-modal-desc" style="color:var(--text-secondary);margin:16px 0"></p>
+      <button class="btn btn-primary" id="service-modal-cta">Записаться</button>
+    </div>
+  </div>
+
+  <div id="trainer-modal" class="modal-overlay">
+    <div class="modal"><button class="modal__close">&times;</button>
+      <h2>Запись к тренеру</h2>
+      <p id="trainer-modal-name" style="color:var(--accent-purple);margin:12px 0 20px"></p>
+      <form id="trainer-book-form">
+        <input type="hidden" id="trainer-book-name">
+        <div class="form-group"><label>Имя</label><input name="name" required></div>
+        <div class="form-group"><label>Телефон</label><input name="phone" required></div>
+        <button type="submit" class="btn btn-primary btn-block">Отправить</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="booking-modal" class="modal-overlay">
+    <div class="modal"><button class="modal__close">&times;</button>
+      <h2>Запись на тренировку</h2>
+      <div id="booking-info"></div>
+      <form id="booking-form">
+        <div class="form-group"><label>Имя</label><input name="name" required></div>
+        <div class="form-group"><label>Телефон</label><input name="phone" required></div>
+        <button type="submit" class="btn btn-primary btn-block">Записаться</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

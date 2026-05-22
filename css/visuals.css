@@ -1,0 +1,109 @@
+/* ===== Визуальные блоки вместо фотографий ===== */
+.visual {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--visual-bg, linear-gradient(135deg, #1a1a2e, #16213e));
+}
+
+.visual::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+}
+
+.visual::after {
+  content: '';
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  top: -50%;
+  left: -50%;
+  background: radial-gradient(circle at 30% 30%, var(--visual-glow, rgba(59,130,246,0.25)), transparent 50%);
+  pointer-events: none;
+}
+
+.visual > i {
+  position: relative;
+  z-index: 1;
+  font-size: clamp(2.5rem, 8vw, 4.5rem);
+  color: rgba(255,255,255,0.35);
+  filter: drop-shadow(0 0 20px var(--visual-glow, rgba(59,130,246,0.5)));
+}
+
+.visual--gym { --visual-bg: linear-gradient(135deg, #1e3a5f, #0d0d0d); --visual-glow: rgba(59,130,246,0.4); }
+.visual--crossfit { --visual-bg: linear-gradient(135deg, #4a1942, #0d0d0d); --visual-glow: rgba(239,68,68,0.35); }
+.visual--yoga { --visual-bg: linear-gradient(135deg, #2d1b4e, #0d0d0d); --visual-glow: rgba(139,92,246,0.4); }
+.visual--pool { --visual-bg: linear-gradient(135deg, #0c4a6e, #0d0d0d); --visual-glow: rgba(16,185,129,0.4); }
+.visual--personal { --visual-bg: linear-gradient(135deg, #1e3a5f, #312e81); --visual-glow: rgba(99,102,241,0.4); }
+.visual--kids { --visual-bg: linear-gradient(135deg, #14532d, #0d0d0d); --visual-glow: rgba(34,197,94,0.35); }
+.visual--sauna { --visual-bg: linear-gradient(135deg, #78350f, #0d0d0d); --visual-glow: rgba(251,146,60,0.35); }
+.visual--strength { --visual-bg: linear-gradient(135deg, #1e40af, #0d0d0d); --visual-glow: rgba(59,130,246,0.45); }
+.visual--functional { --visual-bg: linear-gradient(135deg, #115e59, #0d0d0d); --visual-glow: rgba(20,184,166,0.4); }
+
+.visual--blue { --visual-bg: linear-gradient(135deg, #1e3a8a, #312e81); --visual-glow: rgba(59,130,246,0.4); }
+.visual--purple { --visual-bg: linear-gradient(135deg, #4c1d95, #1e1b4b); --visual-glow: rgba(139,92,246,0.4); }
+.visual--gold { --visual-bg: linear-gradient(135deg, #854d0e, #422006); --visual-glow: rgba(251,191,36,0.4); }
+.visual--dark { --visual-bg: linear-gradient(135deg, #27272a, #09090b); --visual-glow: rgba(161,161,170,0.3); }
+.visual--green { --visual-bg: linear-gradient(135deg, #14532d, #052e16); --visual-glow: rgba(34,197,94,0.35); }
+.visual--cyan { --visual-bg: linear-gradient(135deg, #155e75, #083344); --visual-glow: rgba(6,182,212,0.4); }
+.visual--red { --visual-bg: linear-gradient(135deg, #7f1d1d, #450a0a); --visual-glow: rgba(239,68,68,0.35); }
+.visual--orange { --visual-bg: linear-gradient(135deg, #9a3412, #431407); --visual-glow: rgba(249,115,22,0.35); }
+.visual--teal { --visual-bg: linear-gradient(135deg, #134e4a, #042f2e); --visual-glow: rgba(20,184,166,0.4); }
+.visual--steel { --visual-bg: linear-gradient(135deg, #374151, #111827); --visual-glow: rgba(156,163,175,0.35); }
+
+.hero .visual.hero__bg {
+  position: absolute;
+  inset: 0;
+  min-height: 100%;
+  z-index: 0;
+}
+.hero__bg.visual > i,
+.hero .visual.hero__bg > i { font-size: clamp(6rem, 20vw, 12rem); opacity: 0.15; }
+
+.cart-item__img.visual { width: 100px; height: 100px; min-height: 100px; border-radius: 8px; flex-shrink: 0; }
+.cart-item__img.visual > i { font-size: 2rem; }
+
+.service-card__img.visual { height: 220px; border-radius: var(--radius) var(--radius) 0 0; }
+.product-card__img.visual { height: 200px; }
+.trainer-card__photo.visual { height: 280px; }
+
+.avatar-visual {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  margin: 0 auto 16px;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #fff;
+  background: var(--gradient-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-glow);
+}
+
+.trainer-card__photo.avatar-visual {
+  width: 100%;
+  height: 280px;
+  border-radius: 0;
+  font-size: 4rem;
+  margin: 0;
+}
+
+.zone-card .visual { height: 160px; border-radius: var(--radius-sm); margin-bottom: 12px; }
+.zone-card .visual > i { font-size: 2.5rem; }
+
+.about-visual.visual { min-height: 320px; border-radius: var(--radius); }
+
+.modal-visual.visual { height: 180px; border-radius: 12px; margin-bottom: 20px; }
+
+.auth-body { background: var(--bg-primary); }
+.auth-body .hero__overlay { position: fixed; inset: 0; z-index: 0; }
