@@ -115,7 +115,7 @@ async function registerUser({ name, email, phone, password }) {
 
 /** Авторизация: проверяет localStorage, потом — Supabase */
 async function loginUser(login, password) {
-  // 1. Сначала пробуем локально (быстро, без запросов к БД)
+  // 1. Локальный поиск
   const users = getUsers();
   const localUser = users.find(u => (u.email === login || u.phone === login) && u.password === password);
   if (localUser) {
@@ -123,32 +123,22 @@ async function loginUser(login, password) {
     return localUser;
   }
 
-  // 2. Если есть запись в localStorage (но с неправильным паролем) — не ходим в Supabase
-  const hasLocalLogin = users.some(u => u.email === login || u.phone === login);
-  if (hasLocalLogin) throw new Error('Неверные данные');
+  // 2. Если есть в localStorage с другим паролем — сразу отказываем
+  if (users.some(u => u.email === login || u.phone === login)) throw new Error('Неверные данные');
 
-  // 3. Пробуем найти пользователя в Supabase
+  // 3. Поиск в Supabase + синхронизация в localStorage
   if (window.supabaseClient) {
-    console.log('[Login] Пользователь не найден в localStorage, проверяю Supabase...');
     try {
       const { data, error } = await window.supabaseClient
         .from('users').select('*').eq('email', login.toLowerCase()).single();
-      if (error) throw new Error('Пользователь не найден');
-      if (data) {
-        // Пользователь есть в Supabase — синхронизируем в localStorage и возвращаем
-        const allUsers = getUsers();
-        const found = { ...data, password: password };
-        allUsers.push(found);
-        saveUsers(allUsers);
-        setCurrentUser(found);
-        console.log('[Login] ✅ Загружен из Supabase:', data.email);
-        return found;
-      }
-      throw new Error('Пользователь не найден');
-    } catch(e) {
-      console.warn('[Login] Supabase check failed:', e.message);
-      throw new Error('Пользователь не найден');
-    }
+      if (error || !data) throw new Error('Пользователь не найден');
+      const allUsers = getUsers();
+      const found = { ...data, password };
+      allUsers.push(found);
+      saveUsers(allUsers);
+      setCurrentUser(found);
+      return found;
+    } catch(e) { throw new Error('Пользователь не найден'); }
   }
 
   throw new Error('Пользователь не найден');
